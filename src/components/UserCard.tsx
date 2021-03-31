@@ -11,10 +11,16 @@ interface IUserCardProps {
   onDeletePressed: (user: IUser) => void;
 }
 
+const REMOVE_BUTTON_AREA = { top: 50, bottom: 50, left: 50, right: 50 };
+
 export const UserCard = ({ user, onDeletePressed }: IUserCardProps) => {
   return (
     <View style={UserCardStyles.container}>
-      <TouchableOpacity onPress={() => onDeletePressed(user)} style={UserCardStyles.deleteButton}>
+      <TouchableOpacity
+        hitSlop={REMOVE_BUTTON_AREA}
+        onPress={() => onDeletePressed(user)}
+        style={UserCardStyles.deleteButton}
+      >
         <Icon name={'close'} size={25} color={FONT_COLOR} />
       </TouchableOpacity>
       <Image style={UserCardStyles.avatar} source={{ uri: user.avatar }} />

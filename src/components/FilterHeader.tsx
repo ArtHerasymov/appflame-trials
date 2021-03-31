@@ -32,7 +32,10 @@ export const FilterHeader = ({ filters, onFilterValuesChanged, onSearchAreaClose
                 filters.ageSortingType === AGE_SORTING_TYPES.ASC ? AGE_SORTING_TYPES.DSC : AGE_SORTING_TYPES.ASC,
             })
           }
-          style={FilterHeaderStyles.ageSortButton}
+          style={[
+            FilterHeaderStyles.ageSortButton,
+            { paddingTop: filters.ageSortingType === AGE_SORTING_TYPES.DSC ? 0 : 5 },
+          ]}
         >
           <Icon
             name={filters.ageSortingType === AGE_SORTING_TYPES.DSC ? 'caret-up' : 'caret-down'}
