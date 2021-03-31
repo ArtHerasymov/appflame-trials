@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 
 export const SearchInputStyles = StyleSheet.create({
   container: {
@@ -9,11 +9,11 @@ export const SearchInputStyles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 32,
     justifyContent: 'center',
+    top: Platform.OS === 'android' ? 7 : 0,
     alignItems: 'center',
     marginRight: 4,
   },
   input: {
-    maxWidth: 280,
+    maxWidth: 285,
   },
-
 });

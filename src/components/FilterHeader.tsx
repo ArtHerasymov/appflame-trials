@@ -9,9 +9,10 @@ import { FilterHeaderStyles } from '../styles/components/FiterHeader';
 interface IFilterHeaderProps {
   filters: ISearchFilters;
   onFilterValuesChanged: (value: ISearchFilters) => void;
+  onSearchAreaClosed: () => void;
 }
 
-export const FilterHeader = ({ filters, onFilterValuesChanged }: IFilterHeaderProps) => {
+export const FilterHeader = ({ filters, onFilterValuesChanged, onSearchAreaClosed }: IFilterHeaderProps) => {
   return (
     <View style={FilterHeaderStyles.container}>
       <Icon name={'ios-flame'} size={50} color={'#fff'} />
@@ -19,7 +20,11 @@ export const FilterHeader = ({ filters, onFilterValuesChanged }: IFilterHeaderPr
         <Text style={FilterHeaderStyles.logoText}>APPFLAME</Text>
       </View>
       <View style={FilterHeaderStyles.inputContainer}>
-        <SearchInput onValueChanged={(name: string) => onFilterValuesChanged({ ...filters, name })} />
+        <SearchInput
+          value={filters.name}
+          onClose={onSearchAreaClosed}
+          onValueChanged={(name: string) => onFilterValuesChanged({ ...filters, name })}
+        />
         <TouchableOpacity
           onPress={() =>
             onFilterValuesChanged({

@@ -11,7 +11,7 @@ export interface ISearchFilters {
 }
 
 export interface IUsersState {
-  isUpdating: boolean;
+  isPending: boolean;
   users: IUser[];
   offset: number;
   errorMessage: string;

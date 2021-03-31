@@ -3,7 +3,6 @@ import { SECONDARY_COLOR } from '../colors';
 
 export const UserCardStyles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: SECONDARY_COLOR,
     margin: 10,
     alignItems: 'center',

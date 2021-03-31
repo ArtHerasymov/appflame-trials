@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
 import { connect } from 'react-redux';
-import { deleteUser, fetchUsers, getSearchResults, incrementOffset } from '../creators/user';
 import { ISearchFilters, IUser } from '../reducers/types';
 import { ScreenView } from '../elements/ScreenView';
 import { HomeStyles } from '../styles/screens/Home';
@@ -12,17 +11,24 @@ import { Popup } from '../elements/Popup';
 import { FilterHeader } from '../components/FilterHeader';
 import { UserCard } from '../components/UserCard';
 import { getFilteredUsers } from '../selectors';
-import { Dispatch } from 'redux';
+import {
+  deleteUserAction,
+  fetchUsersAction,
+  filterUsersAction,
+  incrementOffsetAction,
+  startIncrementOffset,
+} from '../actions/users';
 
 interface IHomeProps {
   users: IUser[];
   offset: number;
+  isLoading: boolean;
   getUsers: () => void;
-  isUpdating: boolean;
   filters: ISearchFilters;
   filterUsers: (searchParams: ISearchFilters) => void;
-  removeUser: (id?: string) => void;
+  removeUser: (id: string) => void;
   getNextBatch: (offset: number) => void;
+  startUpdating: () => void;
 }
 
 const Home = ({
@@ -30,15 +36,21 @@ const Home = ({
   offset,
   getNextBatch,
   getUsers,
+  startUpdating,
   filters,
   filterUsers,
   removeUser,
-  isUpdating = false,
+  isLoading,
 }: IHomeProps) => {
+  const listRef = useRef<FlatList<IUser>>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<IUser | undefined>();
   const keyExtractor = useCallback((item) => item.id, []);
-  const onEndReached = useCallback(() => getNextBatch(offset + 1), [offset]);
+  const onEndReached = useCallback(() => getNextBatch(offset + 1), [getNextBatch, offset]);
+  const onRefresh = useCallback(() => {
+    startUpdating();
+    getNextBatch(1);
+  }, [getNextBatch, startUpdating]);
   const onDeleteModalInvoked = useCallback((item: IUser) => {
     setSelectedUser(item);
     setModalVisible(true);
@@ -48,43 +60,55 @@ const Home = ({
     []
   );
   const onDeleteUserPressed = useCallback(() => {
-    removeUser(selectedUser?.id);
+    if (!selectedUser) {
+      return;
+    }
+    removeUser(selectedUser.id);
     setModalVisible(false);
-  }, [selectedUser]);
+  }, [removeUser, selectedUser]);
   const onDeleteModalRevoked = useCallback(() => {
     setModalVisible(false);
     setSelectedUser(undefined);
   }, []);
+
+  const onFilterChanged = (searchParams: ISearchFilters) => {
+    filterUsers(searchParams);
+    if (listRef.current) {
+      listRef.current.scrollToOffset({ animated: true, offset: 0 });
+    }
+  };
+
+  const onSearchAreaClosed = useCallback(() => {
+    filterUsers({ ...filters, name: '' });
+  }, [filterUsers, filters]);
+
   const renderUserView = ({ item }: ListRenderItemInfo<IUser>) => (
     <UserCard user={item} onDeletePressed={onDeleteModalInvoked} />
   );
 
   useEffect(() => {
     getUsers();
-  }, []);
+  }, [getUsers]);
 
   if (!users) {
-    return null;
+    return <ActivityIndicator />;
   }
 
   return (
     <ScreenView navigationMenuColor={BACKGROUND_COLOR} statusBarColor={'#4E3976'}>
-      <FilterHeader filters={filters} onFilterValuesChanged={filterUsers} />
+      <FilterHeader filters={filters} onFilterValuesChanged={onFilterChanged} onSearchAreaClosed={onSearchAreaClosed} />
       <FlatList
+        ref={listRef}
         keyExtractor={keyExtractor}
         numColumns={2}
-        refreshing={isUpdating}
+        refreshing={isLoading}
         refreshControl={
-          <RefreshControl
-            tintColor={MAIN_COLOR}
-            colors={[MAIN_COLOR]}
-            onRefresh={() => getNextBatch(1)}
-            refreshing={isUpdating}
-          />
+          <RefreshControl tintColor={MAIN_COLOR} colors={[MAIN_COLOR]} onRefresh={onRefresh} refreshing={isLoading} />
         }
         ListEmptyComponent={emptyPlaceholder}
         data={users}
         style={HomeStyles.listContainer}
+        contentContainerStyle={{ alignItems: 'center' }}
         renderItem={renderUserView}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.001}
@@ -112,12 +136,14 @@ export default connect(
       users: getFilteredUsers(state),
       offset: state.users.offset,
       filters: state.users.filters,
+      isLoading: state.users.isPending,
     };
   },
   (dispatch) => ({
-    getUsers: () => dispatch(fetchUsers()),
-    filterUsers: (filterParams: ISearchFilters) => dispatch(getSearchResults(filterParams)),
-    removeUser: (id: string) => dispatch(deleteUser(id)),
-    getNextBatch: (offset: string) => dispatch(incrementOffset(offset)),
+    getUsers: () => dispatch(fetchUsersAction()),
+    filterUsers: (filterParams: ISearchFilters) => dispatch(filterUsersAction(filterParams)),
+    removeUser: (id: string) => dispatch(deleteUserAction(id)),
+    getNextBatch: (offset: number) => dispatch(incrementOffsetAction(offset)),
+    startUpdating: () => dispatch(startIncrementOffset()),
   })
 )(Home);

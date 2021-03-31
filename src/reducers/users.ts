@@ -1,19 +1,12 @@
 import { AGE_SORTING_TYPES, IUser, IUsersState } from './types';
 import { UserActionTypes } from '../actions/users';
-import {
-  DELETE_USER,
-  FILTER_USERS,
-  GET_USERS_FAILED,
-  GET_USERS_STARTED,
-  GET_USERS_SUCCESS,
-  INCREMENT_OFFSET,
-} from '../actions/types';
+import { DELETE_USER, FETCH_USERS, FILTER_USERS, INCREMENT_OFFSET, INCREMENT_OFFSET_PENDING } from '../actions/types';
 
 const initialUsersState: IUsersState = {
   users: [],
   offset: 1,
+  isPending: false,
   errorMessage: '',
-  isUpdating: false,
   filters: {
     name: '',
     ageSortingType: AGE_SORTING_TYPES.ASC,
@@ -22,21 +15,10 @@ const initialUsersState: IUsersState = {
 
 export function usersReducer(state: IUsersState = initialUsersState, action: UserActionTypes): IUsersState {
   switch (action.type) {
-    case GET_USERS_SUCCESS:
+    case FETCH_USERS:
       return {
         ...state,
         users: action.payload,
-        isUpdating: false,
-      };
-    case GET_USERS_STARTED:
-      return {
-        ...state,
-        isUpdating: true,
-      };
-    case GET_USERS_FAILED:
-      return {
-        ...initialUsersState,
-        errorMessage: action.payload,
       };
     case FILTER_USERS:
       return {
@@ -52,6 +34,12 @@ export function usersReducer(state: IUsersState = initialUsersState, action: Use
       return {
         ...state,
         offset: action.payload,
+        isPending: false,
+      };
+    case INCREMENT_OFFSET_PENDING:
+      return {
+        ...state,
+        isPending: true,
       };
     default:
       return state;

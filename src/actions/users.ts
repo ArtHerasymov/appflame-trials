@@ -1,64 +1,49 @@
-import { ISearchFilters, IUser, IUsersState } from '../reducers/types';
-import {
-  DELETE_USER,
-  FILTER_USERS,
-  GET_USERS_FAILED,
-  GET_USERS_STARTED,
-  GET_USERS_SUCCESS,
-  INCREMENT_OFFSET,
-} from './types';
+import { ISearchFilters, IUser } from '../reducers/types';
+import { DELETE_USER, FETCH_USERS, FILTER_USERS, INCREMENT_OFFSET, INCREMENT_OFFSET_PENDING } from './types';
+import users from '../../assets/data/users.json';
+import { ascendingComparator } from '../utils/functions';
 
-interface IGetUsersStartedAction {
-  type: typeof GET_USERS_STARTED;
-}
-
-interface IGetUsersSuccessAction {
-  type: typeof GET_USERS_SUCCESS;
+interface IFetchUsersAction {
+  type: FETCH_USERS;
   payload: IUser[];
 }
 
-interface IGetUsersFailedAction {
-  type: typeof GET_USERS_FAILED;
-  payload: string;
-}
-
 interface IDeleteUserAction {
-  type: typeof DELETE_USER;
+  type: DELETE_USER;
   payload: string;
 }
 
 interface IFilterUsersAction {
-  type: typeof FILTER_USERS;
+  type: FILTER_USERS;
   payload: ISearchFilters;
 }
 
 interface IIncrementOffsetAction {
-  type: typeof INCREMENT_OFFSET;
+  type: INCREMENT_OFFSET;
   payload: number;
 }
 
-export const getUsersStartedAction = () => ({
-  type: GET_USERS_STARTED,
-});
+interface IIncrementOffsetPendingAction {
+  type: INCREMENT_OFFSET_PENDING;
+}
 
 export const incrementOffsetAction = (offset: number) => ({
   type: INCREMENT_OFFSET,
   payload: offset,
 });
 
-export const getUsersSuccessAction = (users: IUser[]) => ({
-  type: GET_USERS_SUCCESS,
-  payload: users,
-});
-
-export const getUsersFailedAction = (errorMessage: string) => ({
-  type: GET_USERS_FAILED,
-  payload: errorMessage,
+export const fetchUsersAction = () => ({
+  type: FETCH_USERS,
+  payload: ((users as unknown) as IUser[]).sort(ascendingComparator),
 });
 
 export const deleteUserAction = (id: string) => ({
   type: DELETE_USER,
   payload: id,
+});
+
+export const startIncrementOffset = () => ({
+  type: INCREMENT_OFFSET_PENDING,
 });
 
 export const filterUsersAction = (filterParams: ISearchFilters) => ({
@@ -67,11 +52,8 @@ export const filterUsersAction = (filterParams: ISearchFilters) => ({
 });
 
 export type UserActionTypes =
-  | IGetUsersStartedAction
-  | IGetUsersSuccessAction
-  | IGetUsersFailedAction
+  | IFetchUsersAction
   | IDeleteUserAction
   | IFilterUsersAction
-  | IIncrementOffsetAction;
-
-export type GetUsersTypes = IGetUsersStartedAction & IGetUsersSuccessAction & IGetUsersFailedAction;
+  | IIncrementOffsetAction
+  | IIncrementOffsetPendingAction;
