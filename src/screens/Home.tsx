@@ -18,6 +18,7 @@ import {
   incrementOffsetAction,
   startIncrementOffset,
 } from '../actions/users';
+import { REMOVE_MODAL_MESSAGE } from '../utils/messages';
 
 interface IHomeProps {
   users: IUser[];
@@ -30,6 +31,9 @@ interface IHomeProps {
   getNextBatch: (offset: number) => void;
   startUpdating: () => void;
 }
+
+const LIST_ITEMS_PER_ROW = 2;
+const END_REACHED_THRESHOLD = 0.001;
 
 const Home = ({
   users,
@@ -100,7 +104,7 @@ const Home = ({
       <FlatList
         ref={listRef}
         keyExtractor={keyExtractor}
-        numColumns={2}
+        numColumns={LIST_ITEMS_PER_ROW}
         refreshing={isLoading}
         refreshControl={
           <RefreshControl tintColor={MAIN_COLOR} colors={[MAIN_COLOR]} onRefresh={onRefresh} refreshing={isLoading} />
@@ -108,14 +112,14 @@ const Home = ({
         ListEmptyComponent={emptyPlaceholder}
         data={users}
         style={HomeStyles.listContainer}
-        contentContainerStyle={{ alignItems: 'center' }}
+        contentContainerStyle={HomeStyles.listContent}
         renderItem={renderUserView}
         onEndReached={onEndReached}
-        onEndReachedThreshold={0.001}
+        onEndReachedThreshold={END_REACHED_THRESHOLD}
       />
       <Popup
         isVisible={modalVisible}
-        message={'Are you sure you want to delete this user?'}
+        message={REMOVE_MODAL_MESSAGE}
         onSubmit={{
           text: 'Yes',
           action: onDeleteUserPressed,

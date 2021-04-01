@@ -5,4 +5,7 @@ export const HomeStyles = StyleSheet.create({
   listContainer: {
     backgroundColor: BACKGROUND_COLOR,
   },
+  listContent: {
+    alignItems: 'center',
+  },
 });
