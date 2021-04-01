@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import { AGE_SORTING_TYPES, ISearchFilters, IUser } from '../reducers/types';
 import { RootState } from '../store';
 
-const PAGINATION_LIMIT = 10;
+const PAGINATION_LIMIT = 15;
 
 const getUsers = (state: RootState) => state.users.users;
 const getFilters = (state: RootState) => state.users.filters;
